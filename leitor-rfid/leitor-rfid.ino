@@ -109,30 +109,25 @@ void negarAcesso()
 // Verifica se é o cartão branco
 int isCartaoBranco(String uid)
 {
-  String cartaoBranco = "C2 66 86 AB";
-  uid.toUpperCase();
-
+  String cartaoBranco = "c2 66 86 ab";
+  Serial.println(uid);
+ 
   if (cartaoBranco == uid.substring(1))
   {
-    Serial.println("Entrou dentro");
-    return 1;
+     return 1;
   }
-
-  Serial.println("Entrou fora");
-  Serial.println(uid);
   return 0;
 }
 
 // verifica se é a tag azul
 int isTagAzul(String uid)
 {
-  String tagAzul = "95 B3 16 AB";
+  String tagAzul = "95 b3 16 ab";
   uid.toUpperCase();
 
   if (tagAzul == uid.substring(1))
   {
     return 1;
   }
-
   return 0;
 }
