@@ -56,6 +56,8 @@ void loop() {
     delay(1000);
     return;
   }
+
+  return;
 }
 
 // Inicia as portas
@@ -107,27 +109,25 @@ void negarAcesso()
 }
 
 // Verifica se é o cartão branco
-int isCartaoBranco(String uid)
+bool isCartaoBranco(String uid)
 {
   String cartaoBranco = "c2 66 86 ab";
-  Serial.println(uid);
- 
+  
   if (cartaoBranco == uid.substring(1))
   {
-     return 1;
+     return true;
   }
-  return 0;
+  return false;
 }
 
 // verifica se é a tag azul
-int isTagAzul(String uid)
+bool isTagAzul(String uid)
 {
   String tagAzul = "95 b3 16 ab";
-  uid.toUpperCase();
-
+ 
   if (tagAzul == uid.substring(1))
   {
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
