@@ -10,14 +10,14 @@
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 char st[20];
+String uid;
 
 void setup() {
   Serial.begin(9600); // Initialize serial communications with the PC
   SPI.begin();      // Init SPI bus
   mfrc522.PCD_Init(); // Init MFRC522 card
 
-  pinMode(LED_VERMELHO, OUTPUT);
-  pinMode(LED_VERDE, OUTPUT);
+  iniciarPortas();
 
   Serial.println("Aproxime o cartão");
 }
@@ -33,38 +33,106 @@ void loop() {
     return;
   }
 
-  //Mostra UID na serial
+  uid = lerUID();
+  imprimirUID(uid);
+  //  Serial.println();
+  //  Serial.println("UID lido: ");
+  //  Serial.println(uid);
+
+  if (isCartaoBranco(uid)) //UID 1 - Meu Cartão
+  {
+    liberarAcesso();
+    Serial.println("Olá cidadão, pode entrar!");
+    Serial.println();
+    delay(3000);
+    return;
+  }
+
+  if (isTagAzul(uid)) //UID 2 - Minha tag
+  {
+    negarAcesso();
+    Serial.println("Você foi bloqueado da minha lista. Vá embora!");
+    Serial.println();
+    delay(1000);
+    return;
+  }
+}
+
+// Inicia as portas
+void iniciarPortas()
+{
+  pinMode(LED_VERMELHO, OUTPUT);
+  pinMode(LED_VERDE, OUTPUT);
+}
+
+// Imprimi o UID lido
+void imprimirUID(String uid)
+{
   Serial.print("UID da tag :");
+  Serial.println();
+  Serial.print("Mensagem : ");
+  uid.toUpperCase();
+}
+
+// Retorna o que o UID que foi lido
+String lerUID()
+{
   String conteudo = "";
   byte letra;
   for (byte i = 0; i < mfrc522.uid.size; i++)
   {
-    Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-    Serial.print(mfrc522.uid.uidByte[i], HEX);
     conteudo.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
     conteudo.concat(String(mfrc522.uid.uidByte[i], HEX));
   }
-  Serial.println();
-  Serial.print("Mensagem : ");
-  conteudo.toUpperCase();
 
-  if (conteudo.substring(1) == "C2 66 86 AB") //UID 1 - Meu Cartão
+  return conteudo;
+}
+
+// Libera o acesso
+void liberarAcesso()
+{
+  digitalWrite(LED_VERMELHO, HIGH);
+  digitalWrite(LED_VERDE, LOW);
+  delay(1000);
+  digitalWrite(LED_VERDE, HIGH);
+}
+
+// Nega o acesso
+void negarAcesso()
+{
+  digitalWrite(LED_VERDE, HIGH);
+  digitalWrite(LED_VERMELHO, LOW);
+  delay(1000);
+  digitalWrite(LED_VERMELHO, HIGH);
+}
+
+// Verifica se é o cartão branco
+int isCartaoBranco(String uid)
+{
+  String cartaoBranco = "C2 66 86 AB";
+  uid.toUpperCase();
+
+  if (cartaoBranco == uid.substring(1))
   {
-    digitalWrite(LED_VERMELHO, HIGH);
-    Serial.println("Olá cidadão, pode entrar!");
-    Serial.println();
-    digitalWrite(LED_VERDE, LOW);
-    delay(3000);
-    return;
+    Serial.println("Entrou dentro");
+    return 1;
   }
 
-  if (conteudo.substring(1) == "95 B3 16 AB") //UID 2 - Minha tag
+  Serial.println("Entrou fora");
+  Serial.println(uid);
+  return 0;
+}
+
+// verifica se é a tag azul
+int isTagAzul(String uid)
+{
+  String tagAzul = "95 B3 16 AB";
+  uid.toUpperCase();
+
+  if (tagAzul == uid.substring(1))
   {
-    digitalWrite(LED_VERDE, HIGH);
-    Serial.println("Você foi bloqueado da minha lista. Vá embora!");
-    Serial.println();
-    digitalWrite(LED_VERMELHO, LOW);
-    delay(3000);
-    return;
+    return 1;
   }
+
+  return 0;
 }
